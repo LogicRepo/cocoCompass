@@ -1,23 +1,37 @@
 package com.tene.cococompass;
 
+import android.graphics.drawable.Drawable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
     private ImageView iv_compass;
+    private TextView tv_degree;
     private float[] gravity = new float[3];
     private float[] geomagnetic = new float[3];
     private float azimuth = 0f;
     private float currentAzimuth = 0f;
     private SensorManager sensorManager;
+    //private final Sensor accelerometer;
+
+   /* public MainActivity(){
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+    }*/
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,8 +39,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         setContentView(R.layout.activity_main);
 
         iv_compass = findViewById(R.id.iv_compass);
+        tv_degree = findViewById(R.id.tv_degree);
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+
     }
+
+
 
     @Override
     protected void onPostResume() {
@@ -55,6 +74,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 gravity[0] = alpha*gravity[0] + (1-alpha)*event.values[0];
                 gravity[1] = alpha*gravity[1] + (1-alpha)*event.values[1];
                 gravity[2] = alpha*gravity[2] + (1-alpha)*event.values[2];
+
+                //double gravity1 = Math.sqrt(gravity[0]*gravity[0] + gravity[1]*gravity[1] + gravity[2]*gravity[2]);
+                //Log.d("gravity", ""+gravity1);
             }
 
             if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD){
@@ -70,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 float orientation[] = new float[3];
                 SensorManager.getOrientation(R,orientation);
                 azimuth = (float) Math.toDegrees(orientation[0]);
+                tv_degree.setText(Math.round(azimuth)+"°");
                 azimuth = (azimuth+360)%360;
 
 
@@ -82,6 +105,10 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 animation.setRepeatCount(0);
                 animation.setFillAfter(true);
 
+                Glide.with(this)
+                        .asBitmap()
+                        .load(com.tene.cococompass.R.drawable.compass)
+                        .into(iv_compass);
                 iv_compass.startAnimation(animation);
             }
         }
